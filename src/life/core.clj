@@ -19,11 +19,11 @@
 (defn cell-next-state [alive? neighbors]
   (let [live-neighbor-count (count-where true? neighbors)]
     (cond
-      ;; Any live cell with fewer than two live neighbours dies, as if by underpopulation. 
+      ;; Any live cell with fewer than two live neighbours dies, as if by underpopulation.
       (and alive? (< live-neighbor-count 2))
       false
 
-      ;; Any live cell with two or three live neighbours lives on to the next generation. 
+      ;; Any live cell with two or three live neighbours lives on to the next generation.
       (and alive? (<= 2 live-neighbor-count 3))
       true
 
@@ -31,7 +31,7 @@
       (and alive? (< 3 live-neighbor-count))
       false
 
-      ;; Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.   
+      ;; Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
       (and (not alive?) (= 3 live-neighbor-count))
       true
 
@@ -41,7 +41,7 @@
 (rcf/tests
  (cell-next-state true [true true false true false true false true])
  := false
- 
+
  (cell-next-state true [false false false false false false false false])
  := false)
 
@@ -54,7 +54,7 @@
           :when (not (and (= x target-x)
                           (= y target-y)))]
       [x y])))
-  
+
 (rcf/tests
  (set (neighbor-coordinates [[:a :b :c]
                              [:d :e :f]
@@ -90,7 +90,7 @@
 (defn grid-next-state
   [grid]
   (reduce (fn [new-grid [x y]]
-            (update-in new-grid [x y] 
+            (update-in new-grid [x y]
                        cell-next-state
                        (neighbors grid [x y])))
           grid
@@ -121,23 +121,10 @@
  := "██ \n██ \n   \n")
 
 (defn -main []
-  (loop [step 0
-         grid (read-string (slurp "grid.edn"))]
-    (cond
-      (< 5000 step)
-      nil
-
-      (even? step)
-      (do (print (render grid))
-          (flush)
-          (Thread/sleep 50)
-          (recur (inc step)
-                 (grid-next-state grid)))
-
-      (odd? step)
-      (do
-        ;; clear screen and move cursor to top-left
-        (print "\u001b[2J\u001b[H")
-        (flush)
-        (recur (inc step)
-               grid)))))
+  (loop [grid (read-string (slurp "grid.edn"))]
+    ;; clear screen and move cursor to top-left
+    (print "\u001b[2J\u001b[H")
+    (print (render grid))
+    (flush)
+    (Thread/sleep 50)
+    (recur (grid-next-state grid))))
